@@ -1,0 +1,15 @@
+{
+  "checks": [
+    {
+      "name": "My Custom Domain (HTTPS)",
+      "url": "https://example.com",
+      "port": 443,
+      "method": "GET",
+      "headers": {
+        "User-Agent": "GitHub-Actions-Uptime-Monitor",
+        "X-Custom-Header": "MyValue"
+      },
+      "expectedStatusCodes": [200, 301, 302]
+    }
+  ]
+}

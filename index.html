@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Uptime Monitor Dashboard</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0d1117; color: #c9d1d9; max-width: 900px; margin: 40px auto; padding: 0 20px; }
+        nav { display: flex; gap: 10px; margin-bottom: 20px; }
+        button { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        button.active { background: #1f6feb; border-color: #1f6feb; color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .card { background: #161b22; border: 1px solid #30363d; padding: 20px; border-radius: 6px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .badge { padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 0.9em; }
+        .up { background: #238636; color: white; }
+        .down { background: #da3633; color: white; }
+        textarea { width: 100%; height: 300px; background: #0d1117; color: #c9d1d9; border: 1px solid #30363d; border-radius: 6px; padding: 10px; font-family: monospace; font-size: 14px; }
+        .actions { margin-top: 10px; display: flex; gap: 10px; }
+        .save-btn { background: #238636; color: white; border: none; }
+        .reset-btn { background: #da3633; color: white; border: none; }
+    </style>
+</head>
+<body>
+
+    <h1>Uptime Monitor</h1>
+    <nav>
+        <button id="nav-dashboard" class="active" onclick="switchTab('dashboard')">Dashboard</button>
+        <button id="nav-editor" onclick="switchTab('editor')">Configuration Editor</button>
+    </nav>
+
+    <!-- Dashboard Tab -->
+    <div id="dashboard" class="tab-content active">
+        <h2>Service Statuses</h2>
+        <div id="status-container">Loading status history...</div>
+    </div>
+
+    <!-- Configuration Editor Tab -->
+    <div id="editor" class="tab-content">
+        <h2>Edit Monitor Configuration</h2>
+        <p>Modify ports, headers, expected HTTP status codes, and URLs below. Saved to browser <code>localStorage</code>.</p>
+        <textarea id="config-editor"></textarea>
+        <div class="actions">
+            <button class="save-btn" onclick="saveConfig()">Save to LocalStorage</button>
+            <button class="reset-btn" onclick="resetConfig()">Reset to Default</button>
+            <button onclick="downloadConfig()">Download config.json</button>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            document.getElementById('nav-' + tabName).classList.add('active');
+        }
+
+        // Load and display status history
+        fetch('history.json')
+            .then(res => res.json())
+            .then(data => {
+                if (!data.length) return;
+                const latest = data[0].results;
+                let html = '';
+                latest.forEach(item => {
+                    html += `
+                        <div class="card">
+                            <div>
+                                <h3>${item.name}</h3>
+                                <small>${item.url} | Port: ${item.port || 'Default'} | Response: ${item.responseTime}ms</small>
+                            </div>
+                            <div>
+                                <span class="badge ${item.up ? 'up' : 'down'}">${item.up ? 'UP' : 'DOWN'}</span>
+                            </div>
+                        </div>`;
+                });
+                document.getElementById('status-container').innerHTML = html;
+            })
+            .catch(() => {
+                document.getElementById('status-container').innerText = 'No status history found yet. Run the GitHub Action or wait for the first check.';
+            });
+
+        // Configuration Editor Logic
+        const STORAGE_KEY = 'uptime_monitor_config';
+
+        function loadConfigToEditor() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                document.getElementById('config-editor').value = saved;
+            } else {
+                fetch('config.json')
+                    .then(res => res.text())
+                    .then(text => {
+                        document.getElementById('config-editor').value = text;
+                        localStorage.setItem(STORAGE_KEY, text);
+                    })
+                    .catch(() => {
+                        document.getElementById('config-editor').value = '{"checks": []}';
+                    });
+            }
+        }
+
+        function saveConfig() {
+            const content = document.getElementById('config-editor').value;
+            try {
+                JSON.parse(content);
+                localStorage.setItem(STORAGE_KEY, content);
+                alert('Configuration successfully saved to LocalStorage!');
+            } catch (e) {
+                alert('Invalid JSON format! Please fix errors before saving.');
+            }
+        }
+
+        function resetConfig() {
+            if (confirm('Are you sure you want to reset your configuration?')) {
+                localStorage.removeItem(STORAGE_KEY);
+                loadConfigToEditor();
+                alert('Reset to default.');
+            }
+        }
+
+        function downloadConfig() {
+            const content = document.getElementById('config-editor').value;
+            const blob = new Blob([content], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'config.json';
+            a.click();
+        }
+
+        loadConfigToEditor();
+    </script>
+</body>
+</html>
