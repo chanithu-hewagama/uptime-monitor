@@ -1,5 +1,18 @@
 [
   {
+    "timestamp": "2026-10-04T23:32:40.467Z",
+    "results": [
+      {
+        "name": "My Custom Domain (HTTPS)",
+        "url": "https://example.com/",
+        "port": 443,
+        "up": true,
+        "responseTime": 111,
+        "timestamp": "2026-10-04T23:32:40.466Z"
+      }
+    ]
+  },
+  {
     "timestamp": "2026-10-04T20:29:39.572Z",
     "results": [
       {
