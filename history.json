@@ -1,5 +1,18 @@
 [
   {
+    "timestamp": "2026-10-20T21:24:24.831Z",
+    "results": [
+      {
+        "name": "My Custom Domain (HTTPS)",
+        "url": "https://example.com/",
+        "port": 443,
+        "up": true,
+        "responseTime": 75,
+        "timestamp": "2026-10-20T21:24:24.830Z"
+      }
+    ]
+  },
+  {
     "timestamp": "2026-10-20T17:55:22.513Z",
     "results": [
       {
@@ -1283,19 +1296,6 @@
         "up": true,
         "responseTime": 114,
         "timestamp": "2026-10-02T00:58:51.374Z"
-      }
-    ]
-  },
-  {
-    "timestamp": "2026-10-01T21:22:04.924Z",
-    "results": [
-      {
-        "name": "My Custom Domain (HTTPS)",
-        "url": "https://example.com/",
-        "port": 443,
-        "up": true,
-        "responseTime": 78,
-        "timestamp": "2026-10-01T21:22:04.923Z"
       }
     ]
   }
